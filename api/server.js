@@ -61,25 +61,23 @@ server.post('/api/posts', async (req, res) => {
     }
 })
 
-server.put('/api/posts/:id', async (req, res) => {
-    const { id } = req.params
-    const { body } = req
-    try {
-        if (!updatedPost) {
-            res.status(404).json({
-                message: `"The post with the specified ID ${id} does not exist"`
-            })
-        } else {
-            const updatedPost = await Posts.update(id, body)
-            res.status(200).json(updatedPost)
-        }
-    } catch (err) {
-        res.status(500).json({
-            message: "The post information could not be modified",
-            error: err.message,
-        })
-    }
-})
+server.put('/api/posts/:id', (req, res) => {
+    const changes = req.body;
+  Posts.update(req.params.id, changes)
+    .then(post => {
+      if (post) {
+        res.status(200).json(post);
+      } else {
+        res.status(404).json({ message: 'The post could not be found' });
+      }
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(500).json({
+        message: 'Error updating the post',
+      });
+    });
+});
 
 server.delete('/api/posts/:id', async (req, res) => {
     const { id } = req.params
@@ -100,6 +98,24 @@ server.delete('/api/posts/:id', async (req, res) => {
             })
         })
 })
+
+server.get('/api/posts/:id/comments', (req, res) => {
+    Posts.findPostComments(req.params.id)
+      .then(comments => {
+        if (comments.length > 0) {
+          res.status(200).json(comments);
+        } else {
+          res.status(404).json({ message: 'The post with the specified ID does not exist' });
+        }
+      })
+      .catch(error => {
+        console.log(error);
+        res.status(500).json({
+          message: 'The comments information could not be retrieved',
+        });
+      });
+  });
+
 
 
 

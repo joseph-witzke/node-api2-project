@@ -25,6 +25,26 @@ server.get('/api/posts', (req, res) => {
     })
 })
 
+server.get('/api/posts/:id', async (req, res) => {
+    try {
+        if (!req.params.id) {
+            res.status(404).json({
+                message: `The post with the specified ID ${id} does not exist`
+            })
+        } else {
+            const post = await Posts.findById(req.params.id)
+            res.status(200).json(post)
+        }
+    } catch (err) {
+        res.status(500).json({
+        message: "The post information could not be retrieved",
+        error: err.message,
+        })
+    }
+})
+
+server.post('/api/posts', )
+
 
 // EXPOSING THE SERVER TO OTHER MODULES
 module.exports = server
